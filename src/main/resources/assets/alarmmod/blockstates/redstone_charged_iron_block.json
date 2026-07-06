@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "alarmmod:block/redstone_charged_iron_block"
+    }
+  }
+}

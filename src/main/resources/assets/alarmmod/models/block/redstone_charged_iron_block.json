@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "alarmmod:block/redstone_iron_block"
+    "all": "alarmmod:block/redstone_charged_iron_block"
   }
 }

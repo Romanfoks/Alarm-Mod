@@ -1,7 +1,6 @@
 {
-  "item.alarmmod.redstone_iron": "Заряженое Редстоуном железо",
-  "block.alarmmod.redstone_iron_block": "Блок Редтоунового железа",
+  "item.alarmmod.redstone_charged_iron": "Заряженое Редстоуном железо",
+  "block.alarmmod.redstone_charged_iron_block": "Заряженный редстоуном железный блок",
   "block.alarmmod.alarm": "Сирена",
-  "creativetab.alarmmod.items": "Alarm Mod: Предметы",
-  "creativetab.alarmmod.blocks": "Alarm Mod: Блоки"
+  "creativetab.alarmmod.items": "Alarm Mod"
 }

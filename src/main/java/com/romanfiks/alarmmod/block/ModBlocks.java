@@ -1,6 +1,8 @@
 package com.romanfiks.alarmmod.block;
 
 import com.romanfiks.alarmmod.AlarmMod;
+import com.romanfiks.alarmmod.block.custom.AlarmBlock;
+import com.romanfiks.alarmmod.block.custom.MagicBlock;
 import com.romanfiks.alarmmod.item.ModItems;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
@@ -17,11 +19,13 @@ import java.util.function.Supplier;
 
 public class ModBlocks { public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(AlarmMod.MOD_ID);
 
-    public static final DeferredBlock<Block> REDSTONE_IRON_BLOCK = registerBlock("redstone_iron_block",
+    public static final DeferredBlock<Block> REDSTONE_CHARGED_IRON_BLOCK = registerBlock("redstone_charged_iron_block",
             () -> new Block(BlockBehaviour.Properties.of()
                     .strength(5f).requiresCorrectToolForDrops().sound(SoundType.METAL)));
     public static final DeferredBlock<Block> ALARM = registerBlock("alarm",
-            () -> new DropExperienceBlock(UniformInt.of(2,4),BlockBehaviour.Properties.of()
+            () -> new AlarmBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.METAL)));
+    public static final DeferredBlock<Block> MAGIC_BLOCK = registerBlock("magic_block",
+            () -> new MagicBlock(BlockBehaviour.Properties.of()
                     .strength(3f).requiresCorrectToolForDrops().sound(SoundType.METAL)));
 
 

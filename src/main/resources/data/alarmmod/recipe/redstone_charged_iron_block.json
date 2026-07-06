@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "mics",
+  "key": {
+    "B": {
+      "item": "alarmmod:redstone_charged_iron"
+    }
+  },
+  "pattern": [
+    "BBB",
+    "BBB",
+    "BBB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "alarmmod:redstone_charged_iron_block"
+  }
+}

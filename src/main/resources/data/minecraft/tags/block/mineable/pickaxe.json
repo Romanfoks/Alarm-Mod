@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "alarmmod:redstone_charged_iron_block",
+    "alarmmod:alarm"
+  ]
+}
