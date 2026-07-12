@@ -1,0 +1,19 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "item": "alarmmod:lapis_dust"
+    },
+    {
+      "type": "fluid_stack",
+      "amount": 250,
+      "fluid": "powergrid:acid"
+    }
+  ],
+  "results": [
+    {
+      "amount": 250,
+      "fluid": "alarmmod:lazurite_solution"
+    }
+  ]
+}

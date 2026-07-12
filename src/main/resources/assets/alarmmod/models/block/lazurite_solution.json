@@ -1,0 +1,8 @@
+{
+  "fluid": "alarmmod:lazurite_solution",
+  "particles": {
+    "down": {
+      "texture": "minecraft:block/water_still"
+    }
+  }
+}
