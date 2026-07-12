@@ -6,21 +6,32 @@ import foundry.veil.api.client.render.light.data.AreaLightData;
 import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import net.minecraft.core.BlockPos;
 import org.joml.Vector3f;
+import org.joml.Quaternionf;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("resource")
 public class AlarmLightClient {
 
     private record AlarmLights(LightRenderHandle<AreaLightData> first, LightRenderHandle<AreaLightData> second) {}
 
     private static final Map<BlockPos, AlarmLights> LIGHT_MAP = new HashMap<>();
 
-    static void tick() {
+    // Конфигурация
+    private static final float LIGHT_DISTANCE = 8.0f;           // Дальность света
+    private static final float LIGHT_BRIGHTNESS = 2.0f;         // Яркость
+    private static final long ROTATION_PERIOD = 650;           // Период вращения (мс) - полный оборот за 9 секунд
+
+
+    // Используем игровое время (тиков) для стабильного, детерминированного вращения
+    // Один игровой тик = 50 ms
+    static void tick(long gameTicks) {
         if (LIGHT_MAP.isEmpty()) return;
-        double angle = System.currentTimeMillis() / 3000.0 * Math.PI;
+
+
         for (Map.Entry<BlockPos, AlarmLights> entry : LIGHT_MAP.entrySet()) {
-            updatePositions(entry.getKey(), entry.getValue(), angle);
+            updatePositions(entry.getKey(), entry.getValue(), gameTicks);
         }
     }
 
@@ -33,61 +44,72 @@ public class AlarmLightClient {
     static void onAlarmRemove(BlockPos pos) {
         AlarmLights pair = LIGHT_MAP.remove(pos);
         if (pair != null) {
-            pair.first().free();
-            pair.second().free();
+            if (pair.first() != null) pair.first().free();
+            if (pair.second() != null) pair.second().free();
         }
     }
 
     static void addOrUpdateLight(AlarmBlockEntity be) {
         BlockPos pos = be.getBlockPos();
 
-        AlarmLights pair = LIGHT_MAP.get(pos);
-        if (pair == null) {
-            float cx = pos.getX() + 0.5f;
-            float cy = pos.getY() + 0.5f;
-            float cz = pos.getZ() + 0.5f;
-
-            AreaLightData light1 = new AreaLightData();
-            light1.setOcclusionEnabled(true);
-            light1.setSize(0.2f, 0.2f);
-            light1.setAngle((float) Math.toRadians(90));
-            light1.setDistance(8.0f);
-            light1.setColor(1, 0, 0);
-            light1.setBrightness(2.0f);
-            light1.getPositionMutable().set(cx, cy, cz);
-
-            AreaLightData light2 = new AreaLightData();
-            light2.setOcclusionEnabled(true);
-            light2.setSize(0.2f, 0.2f);
-            light2.setAngle((float) Math.toRadians(90));
-            light2.setDistance(8.0f);
-            light2.setColor(1, 0, 0);
-            light2.setBrightness(2.0f);
-            light2.getPositionMutable().set(cx, cy, cz);
-
-            LightRenderHandle<AreaLightData> h1 = VeilRenderSystem.renderer().getLightRenderer().addLight(light1);
-            LightRenderHandle<AreaLightData> h2 = VeilRenderSystem.renderer().getLightRenderer().addLight(light2);
-            LIGHT_MAP.put(pos, new AlarmLights(h1, h2));
+        if (LIGHT_MAP.containsKey(pos)) {
+            return;
         }
+
+        float cx = pos.getX() + 0.5f;
+        float cy = pos.getY() + 0.5f;
+        float cz = pos.getZ() + 0.5f;
+
+        AreaLightData light1 = createLightData();
+        light1.getPositionMutable().set(cx, cy, cz);
+
+
+        AreaLightData light2 = createLightData();
+        light2.getPositionMutable().set(cx, cy, cz);
+
+        LightRenderHandle<AreaLightData> h1 = VeilRenderSystem.renderer().getLightRenderer().addLight(light1);
+        LightRenderHandle<AreaLightData> h2 = VeilRenderSystem.renderer().getLightRenderer().addLight(light2);
+
+        LIGHT_MAP.put(pos, new AlarmLights(h1, h2));
     }
 
-    private static void updatePositions(BlockPos pos, AlarmLights pair, double angle) {
+    private static AreaLightData createLightData() {
+        AreaLightData light = new AreaLightData();
+        light.setOcclusionEnabled(true);
+        light.setSize(0.2f, 0.2f);
+        light.setAngle((float) Math.toRadians(90));
+        light.setDistance(LIGHT_DISTANCE);
+        light.setColor(1, 0, 0); // Красный
+        light.setBrightness(LIGHT_BRIGHTNESS);
+        return light;
+    }
+
+    private static void updatePositions(BlockPos pos, AlarmLights pair, long gameTicks) {
         float cx = pos.getX() + 0.5f;
         float cy = pos.getY() + 0.6f;
         float cz = pos.getZ() + 0.5f;
-        float radius = 0.4f;
 
-        float dx1 = (float) Math.cos(angle);
-        float dz1 = (float) Math.sin(angle);
-        pair.first().getLightData().getPositionMutable().set(cx + dx1 * radius, cy, cz + dz1 * radius);
-        pair.first().getLightData().getOrientationMutable().lookAlong(new Vector3f(dx1, -0.3f, dz1), new Vector3f(0, 1, 0));
+        // Вычисляем угол на основе игрового времени
+        long periodTicks = Math.max(1, ROTATION_PERIOD / 50);
+        double normalized = (gameTicks % periodTicks) / (double) periodTicks;
+        double angle = normalized * Math.PI * 2.0;
+
+        // Оба света в одной позиции (центр блока)
+        pair.first().getLightData().getPositionMutable().set(cx, cy, cz);
+        pair.second().getLightData().getPositionMutable().set(cx, cy, cz);
+
+        // Первый свет - фиксированная ориентация вверх-вниз
+        Vector3f direction1 = new Vector3f(0f, 1f, 0f).normalize();
+        pair.first().getLightData().getOrientationMutable().lookAlong(direction1, new Vector3f(0, 1, 0));
         pair.first().markDirty();
 
-        double angle2 = angle + Math.PI;
-        float dx2 = (float) Math.cos(angle2);
-        float dz2 = (float) Math.sin(angle2);
-        pair.second().getLightData().getPositionMutable().set(cx + dx2 * radius, cy, cz + dz2 * radius);
-        pair.second().getLightData().getOrientationMutable().lookAlong(new Vector3f(dx2, -0.3f, dz2), new Vector3f(0, 1, 0));
+        // Второй свет - вращающаяся ориентация (по горизонтали)
+        // Используем quaternion для надёжного вращения вокруг Y оси
+        Quaternionf rotation = new Quaternionf();
+        rotation.rotationY((float) angle);
+        Vector3f baseDirection = new Vector3f(0f, 0f, 1f);
+        rotation.transform(baseDirection);
+        pair.second().getLightData().getOrientationMutable().set(rotation);
         pair.second().markDirty();
     }
 }

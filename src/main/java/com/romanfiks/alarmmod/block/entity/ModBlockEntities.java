@@ -3,7 +3,6 @@ package com.romanfiks.alarmmod.block.entity;
 import com.romanfiks.alarmmod.AlarmMod;
 import com.romanfiks.alarmmod.block.ModBlocks;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;

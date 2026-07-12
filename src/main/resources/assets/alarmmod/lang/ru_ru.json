@@ -1,6 +1,11 @@
 {
   "item.alarmmod.redstone_charged_iron": "Заряженое Редстоуном железо",
+  "item.alarmmod.redstone_iron": "Редстоуновое железо",
+  "item.alarmmod.lapis_dust": "Порошок Лазурита",
+  "item.alarmmod.lazurite_solution_bucket": "Ведро раствора лазурита",
   "block.alarmmod.redstone_charged_iron_block": "Заряженный редстоуном железный блок",
   "block.alarmmod.alarm": "Сирена",
+  "fluid.kubejs.lazurite_acid": "Лазуритовая Кислота",
+  "fluid.kubejs.redstone_acid": "Редстоуновая Кислота",
   "creativetab.alarmmod.items": "Alarm Mod"
 }

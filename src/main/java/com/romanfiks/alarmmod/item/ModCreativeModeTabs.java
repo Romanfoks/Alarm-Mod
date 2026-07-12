@@ -20,9 +20,10 @@ public class ModCreativeModeTabs {
                     .title(Component.translatable("creativetab.alarmmod.items"))
                             .displayItems((itemDisplayParameters, output) -> {
                                 output.accept(ModItems.REDSTONE_CHARGED_IRON);
+                                output.accept(ModItems.REDSTONE_IRON);
                                 output.accept(ModBlocks.REDSTONE_CHARGED_IRON_BLOCK);
+                                output.accept(ModItems.LAPIS_DUST);
                                 output.accept(ModBlocks.ALARM);
-                                output.accept(ModBlocks.MAGIC_BLOCK);
                     })
                     .build());
 

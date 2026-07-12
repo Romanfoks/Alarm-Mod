@@ -82,7 +82,7 @@
 				"south": {"uv": [9, 8, 12, 11], "texture": "#0"},
 				"west": {"uv": [6, 8, 9, 11], "texture": "#0"},
 				"up": {"uv": [6, 8, 3, 5], "texture": "#0"},
-				"down": {"uv": [9, 5, 6, 8], "texture": "#0"}
+				"down": {"uv": [9, 5, 6, 8], "texture": "#missing"}
 			}
 		},
 		{
@@ -95,7 +95,7 @@
 				"south": {"uv": [3, 12, 4, 14], "texture": "#0"},
 				"west": {"uv": [2, 12, 3, 14], "texture": "#0"},
 				"up": {"uv": [2, 12, 1, 11], "texture": "#0"},
-				"down": {"uv": [3, 11, 2, 12], "texture": "#0"}
+				"down": {"uv": [3, 11, 2, 12], "texture": "#missing"}
 			}
 		}
 	],
@@ -114,5 +114,6 @@
 			"color": 0,
 			"children": [5, 6]
 		}
-	]
+	],
+	"render_type": "minecraft:translucent"
 }

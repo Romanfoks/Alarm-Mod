@@ -2,13 +2,10 @@ package com.romanfiks.alarmmod.block;
 
 import com.romanfiks.alarmmod.AlarmMod;
 import com.romanfiks.alarmmod.block.custom.AlarmBlock;
-import com.romanfiks.alarmmod.block.custom.MagicBlock;
 import com.romanfiks.alarmmod.item.ModItems;
-import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -24,9 +21,6 @@ public class ModBlocks { public static final DeferredRegister.Blocks BLOCKS = De
                     .strength(5f).requiresCorrectToolForDrops().sound(SoundType.METAL)));
     public static final DeferredBlock<Block> ALARM = registerBlock("alarm",
             () -> new AlarmBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.METAL)));
-    public static final DeferredBlock<Block> MAGIC_BLOCK = registerBlock("magic_block",
-            () -> new MagicBlock(BlockBehaviour.Properties.of()
-                    .strength(3f).requiresCorrectToolForDrops().sound(SoundType.METAL)));
 
 
 
