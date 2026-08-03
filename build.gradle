@@ -128,11 +128,12 @@ configurations {
 }
 
 dependencies {
-    implementation "maven.modrinth:u6dRKJwZ:eBag7ypX"
-    implementation "maven.modrinth:power-grid:8EtGIOFr"
-    implementation "maven.modrinth:lhGA9TYQ:ZxYGwlk0"
-    implementation "maven.modrinth:LNytGWDc:UjX6dr61"
-   implementation("foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}") {
+   implementation "maven.modrinth:u6dRKJwZ:eBag7ypX"
+   implementation "maven.modrinth:power-grid:8EtGIOFr"
+   implementation "maven.modrinth:lhGA9TYQ:ZxYGwlk0"
+   implementation "maven.modrinth:LNytGWDc:UjX6dr61"
+   implementation "maven.modrinth:T9PomCSv:1L6XJqnY"
+  implementation("foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}") {
         exclude group: "maven.modrinth"
         exclude group: "me.fallenbreath"
   }
