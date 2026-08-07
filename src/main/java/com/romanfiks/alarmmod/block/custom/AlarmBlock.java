@@ -107,8 +107,8 @@ public class AlarmBlock extends BaseEntityBlock {
 
     public static void updateAlarm(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
-            // TODO: TEST - Always on to debug redstone detection
-            be.setAlarmOn(true);
+            int redstoneSignal = getRedstoneSignal(level, pos);
+            be.setRedstoneSignal(redstoneSignal);
         }
     }
 

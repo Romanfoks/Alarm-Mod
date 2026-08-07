@@ -138,7 +138,9 @@ dependencies {
         exclude group: "me.fallenbreath"
   }
     implementation("foundry.imguimc:imguimc-neoforge-${project.minecraft_version}:${project.imguimc_version}")
+    implementation("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:1.6.0")
  }
+
 
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.

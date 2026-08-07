@@ -24,7 +24,7 @@ public class AlarmLightClient {
 
     // Конфигурация
     private static final float LIGHT_DISTANCE = 8.0f;           // Дальность света
-    private static final float LIGHT_BRIGHTNESS = 2.0f;         // Яркость
+    private static final float MAX_LIGHT_BRIGHTNESS = 2.0f;     // Максимальная яркость
     private static final long ROTATION_PERIOD = 650;           // Период вращения (мс) - полный оборот за 9 секунд
 
 
@@ -78,12 +78,16 @@ public class AlarmLightClient {
         float cy = worldPos.y;
         float cz = worldPos.z;
 
-        AreaLightData light1 = createLightData();
+        // Calculate brightness from redstone signal (0-15 -> 0.0-2.0)
+        float brightness = (be.getRedstoneSignal() / 15f) * MAX_LIGHT_BRIGHTNESS;
+        LOGGER.info("Redstone signal: {}, calculated brightness: {}", be.getRedstoneSignal(), brightness);
+
+        AreaLightData light1 = createLightData(brightness);
         light1.getPositionMutable().set(cx, cy, cz);
         LOGGER.info("Light1 position set to ({}, {}, {})", cx, cy, cz);
 
 
-        AreaLightData light2 = createLightData();
+        AreaLightData light2 = createLightData(brightness);
         light2.getPositionMutable().set(cx, cy, cz);
         LOGGER.info("Light2 position set to ({}, {}, {})", cx, cy, cz);
 
@@ -99,15 +103,15 @@ public class AlarmLightClient {
         }
     }
 
-    private static AreaLightData createLightData() {
+    private static AreaLightData createLightData(float brightness) {
         AreaLightData light = new AreaLightData();
         light.setOcclusionEnabled(false);
         light.setSize(1.0f, 1.0f);
         light.setAngle((float) Math.toRadians(120));
         light.setDistance(LIGHT_DISTANCE);
         light.setColor(1, 0, 0);
-        light.setBrightness(LIGHT_BRIGHTNESS);
-        LOGGER.info("Created light: brightness={}, distance={}, color=red", LIGHT_BRIGHTNESS, LIGHT_DISTANCE);
+        light.setBrightness(brightness);
+        LOGGER.info("Created light: brightness={}, distance={}, color=red", brightness, LIGHT_DISTANCE);
         return light;
     }
 

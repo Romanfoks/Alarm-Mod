@@ -23,6 +23,7 @@ public class AlarmBlockEntity extends BlockEntity {
 
     private boolean isAlarmOn = false;
     private int color = 0xFF0000;
+    private int redstoneSignal = 0;
 
     public AlarmBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ALARM_BE.get(), pos, state);
@@ -30,9 +31,22 @@ public class AlarmBlockEntity extends BlockEntity {
 
     public boolean isAlarmOn() { return isAlarmOn; }
     public int getColor() { return color; }
+    public int getRedstoneSignal() { return redstoneSignal; }
 
     public void setAlarmOn(boolean on) {
         this.isAlarmOn = on;
+        this.setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+            if (level.isClientSide && onClientChanged != null) {
+                onClientChanged.accept(worldPosition, this);
+            }
+        }
+    }
+
+    public void setRedstoneSignal(int signal) {
+        this.redstoneSignal = Math.max(0, Math.min(15, signal));
+        this.isAlarmOn = this.redstoneSignal > 0;
         this.setChanged();
         if (level != null) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
@@ -77,6 +91,7 @@ public class AlarmBlockEntity extends BlockEntity {
     protected void saveAdditional(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
         tag.putBoolean("AlarmOn", isAlarmOn);
         tag.putInt("Color", color);
+        tag.putInt("RedstoneSignal", redstoneSignal);
         super.saveAdditional(tag, registries);
     }
 
@@ -85,6 +100,7 @@ public class AlarmBlockEntity extends BlockEntity {
         super.loadAdditional(tag, registries);
         this.isAlarmOn = tag.getBoolean("AlarmOn");
         this.color = tag.getInt("Color");
+        this.redstoneSignal = tag.getInt("RedstoneSignal");
     }
 
     @Override
