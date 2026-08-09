@@ -5,57 +5,53 @@ import com.romanfiks.alarmmod.block.ModBlocks;
 import com.romanfiks.alarmmod.block.entity.AlarmBlockEntity;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.Block;
-import java.lang.reflect.Method;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
+
 @EventBusSubscriber(modid = AlarmMod.MOD_ID, value = Dist.CLIENT)
-public class AlarmClientHandler {
-    
+public final class AlarmClientHandler {
+
     private static final Logger LOGGER = LoggerFactory.getLogger("AlarmMod/AlarmClientHandler");
-    private static boolean registeredTick;
+    private static boolean registeredFrameListener;
+
+    private AlarmClientHandler() {
+    }
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        LOGGER.info("AlarmClientHandler.onClientSetup called");
-        // Устанавливаем рендер-слой для блока Alarm, чтобы полупрозрачные части модели отображались корректно
         try {
-            // Используем рефлексию, чтобы избежать жёсткой ссылки на RenderTypeLookup, которая может отсутствовать в некоторых окружениях
             Class<?> rtlClass = Class.forName("net.minecraft.client.renderer.RenderTypeLookup");
             Method setRenderLayer = rtlClass.getMethod("setRenderLayer", Block.class, RenderType.class);
             setRenderLayer.invoke(null, ModBlocks.ALARM.get(), RenderType.translucent());
-        } catch (Throwable t) {
-            // В некоторых dev-окружениях класс/метод может быть недоступен; безопасно игнорируем ошибку
+        } catch (ReflectiveOperationException e) {
+            LOGGER.debug("RenderTypeLookup is unavailable; using the default alarm render layer", e);
         }
 
         AlarmBlockEntity.onClientLoad = AlarmLightClient::onAlarmLoad;
         AlarmBlockEntity.onClientRemove = AlarmLightClient::onAlarmRemove;
         AlarmBlockEntity.onClientChanged = (pos, be) -> {
-            LOGGER.info("onClientChanged: pos={}, isAlarmOn={}", pos, be.isAlarmOn());
             if (be.isAlarmOn()) {
                 AlarmLightClient.addOrUpdateLight(be);
             } else {
                 AlarmLightClient.onAlarmRemove(pos);
             }
         };
-        if (!registeredTick) {
-            NeoForge.EVENT_BUS.addListener(LevelTickEvent.Post.class, AlarmClientHandler::onLevelTick);
-            registeredTick = true;
-            LOGGER.info("Registered level tick listener");
+
+        if (!registeredFrameListener) {
+            NeoForge.EVENT_BUS.addListener(RenderFrameEvent.Pre.class, AlarmClientHandler::onRenderFrame);
+            registeredFrameListener = true;
         }
     }
 
-    private static void onLevelTick(LevelTickEvent.Post event) {
-        if (event.getLevel() instanceof ClientLevel) {
-            // Передаём текущее игровое время (тик) в клиентский обработчик света
-            AlarmLightClient.tick(event.getLevel().getGameTime());
-        }
+    private static void onRenderFrame(RenderFrameEvent.Pre event) {
+        AlarmLightClient.tick(event.getPartialTick().getRealtimeDeltaTicks());
     }
 }
