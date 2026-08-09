@@ -1,12 +1,18 @@
 package com.romanfiks.alarmmod.client;
 
+import com.romanfiks.alarmmod.block.custom.AlarmBlock;
 import com.romanfiks.alarmmod.block.entity.AlarmBlockEntity;
+import dev.ryanhcode.sable.companion.SableCompanion;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.data.AreaLightData;
+import foundry.veil.api.client.render.light.data.PointLightData;
 import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
-import org.joml.Quaternionf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,190 +20,244 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("resource")
-public class AlarmLightClient {
-    
+public final class AlarmLightClient {
+
     private static final Logger LOGGER = LoggerFactory.getLogger("AlarmMod/AlarmLightClient");
 
-    private record AlarmLights(LightRenderHandle<AreaLightData> first, LightRenderHandle<AreaLightData> second, net.minecraft.world.level.Level level) {}
+    private record AlarmLights(
+        LightRenderHandle<PointLightData> ambient,
+        LightRenderHandle<AreaLightData> firstSweep,
+        LightRenderHandle<AreaLightData> secondSweep,
+        Level level
+    ) {}
 
     private static final Map<BlockPos, AlarmLights> LIGHT_MAP = new HashMap<>();
 
-    // Конфигурация
-    private static final float LIGHT_DISTANCE = 8.0f;           // Дальность света
-    private static final float MAX_LIGHT_BRIGHTNESS = 2.0f;     // Максимальная яркость
-    private static final long ROTATION_PERIOD = 650;           // Период вращения (мс) - полный оборот за 9 секунд
+    private static final float AMBIENT_RADIUS = 5.5f;
+    private static final float AMBIENT_MAX_BRIGHTNESS = 0.45f;
+    private static final float SWEEP_DISTANCE = 9.0f;
+    private static final float SWEEP_MAX_BRIGHTNESS = 1.35f;
+    private static final float SWEEP_ANGLE = (float) Math.toRadians(28.0D);
+    private static final long ROTATION_PERIOD_TICKS = 20L;
+    private static final double ROTATION_RADIANS_PER_TICK = Math.PI * 2.0D / ROTATION_PERIOD_TICKS;
+    private static final double LIGHT_FACE_OFFSET = 0.02D;
+    private static double rotationAngle;
 
+    private AlarmLightClient() {
+    }
 
-    // Используем игровое время (тиков) для стабильного, детерминированного вращения
-    // Один игровой тик = 50 ms
-    static void tick(long gameTicks) {
-        if (LIGHT_MAP.isEmpty()) return;
+    static void tick(float realtimeDeltaTicks) {
+        if (LIGHT_MAP.isEmpty()) {
+            return;
+        }
 
+        rotationAngle = (rotationAngle + Math.max(0.0f, realtimeDeltaTicks) * ROTATION_RADIANS_PER_TICK)
+            % (Math.PI * 2.0D);
 
         for (Map.Entry<BlockPos, AlarmLights> entry : LIGHT_MAP.entrySet()) {
-            updatePositions(entry.getKey(), entry.getValue(), gameTicks);
+            updateLights(entry.getKey(), entry.getValue(), rotationAngle);
         }
     }
 
     static void onAlarmLoad(AlarmBlockEntity be) {
-        LOGGER.info("onAlarmLoad called for {}, isAlarmOn={}", be.getBlockPos(), be.isAlarmOn());
         if (be.isAlarmOn()) {
             addOrUpdateLight(be);
         }
     }
 
     static void onAlarmRemove(BlockPos pos) {
-        LOGGER.info("onAlarmRemove called for {}", pos);
-        AlarmLights pair = LIGHT_MAP.remove(pos);
-        if (pair != null) {
-            if (pair.first() != null) pair.first().free();
-            if (pair.second() != null) pair.second().free();
+        AlarmLights lights = LIGHT_MAP.remove(pos);
+        if (lights == null) {
+            return;
         }
+
+        lights.ambient().free();
+        lights.firstSweep().free();
+        lights.secondSweep().free();
     }
 
     static void addOrUpdateLight(AlarmBlockEntity be) {
         BlockPos pos = be.getBlockPos();
-        LOGGER.info("=== addOrUpdateLight called for {}", pos);
-
         if (LIGHT_MAP.containsKey(pos)) {
-            LOGGER.info("Light already exists for {}", pos);
             return;
         }
 
-        net.minecraft.world.level.Level level = be.getLevel();
+        Level level = be.getLevel();
         if (level == null) {
-            LOGGER.warn("Cannot add light for {} - level is null", pos);
+            LOGGER.warn("Cannot add alarm light for {} because its level is null", pos);
             return;
         }
 
-        // Get world position (handles Sable sub-levels correctly)
-        Vector3f worldPos = getWorldPositionWithLevel(level, pos);
-        LOGGER.info("World position for {}: ({}, {}, {})", pos, worldPos.x, worldPos.y, worldPos.z);
-        
-        float cx = worldPos.x;
-        float cy = worldPos.y;
-        float cz = worldPos.z;
+        float signalStrength = be.getRedstoneSignal() / 15.0f;
+        PointLightData ambient = createAmbientLight(signalStrength);
+        AreaLightData firstSweep = createSweepLight(signalStrength);
+        AreaLightData secondSweep = createSweepLight(signalStrength);
+        updateLightData(level, pos, rotationAngle, ambient, firstSweep, secondSweep);
 
-        // Calculate brightness from redstone signal (0-15 -> 0.0-2.0)
-        float brightness = (be.getRedstoneSignal() / 15f) * MAX_LIGHT_BRIGHTNESS;
-        LOGGER.info("Redstone signal: {}, calculated brightness: {}", be.getRedstoneSignal(), brightness);
-
-        AreaLightData light1 = createLightData(brightness);
-        light1.getPositionMutable().set(cx, cy, cz);
-        LOGGER.info("Light1 position set to ({}, {}, {})", cx, cy, cz);
-
-
-        AreaLightData light2 = createLightData(brightness);
-        light2.getPositionMutable().set(cx, cy, cz);
-        LOGGER.info("Light2 position set to ({}, {}, {})", cx, cy, cz);
-
+        LightRenderHandle<PointLightData> ambientHandle = null;
+        LightRenderHandle<AreaLightData> firstSweepHandle = null;
+        LightRenderHandle<AreaLightData> secondSweepHandle = null;
         try {
-            LOGGER.info("Adding lights to Veil renderer...");
-            LightRenderHandle<AreaLightData> h1 = VeilRenderSystem.renderer().getLightRenderer().addLight(light1);
-            LightRenderHandle<AreaLightData> h2 = VeilRenderSystem.renderer().getLightRenderer().addLight(light2);
-
-            LIGHT_MAP.put(pos, new AlarmLights(h1, h2, level));
-            LOGGER.info("=== Light added successfully for {} at position ({}, {}, {})", pos, cx, cy, cz);
-        } catch (Exception e) {
-            LOGGER.error("Failed to add light for {}", pos, e);
+            ambientHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(ambient);
+            firstSweepHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(firstSweep);
+            secondSweepHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(secondSweep);
+            LIGHT_MAP.put(pos, new AlarmLights(ambientHandle, firstSweepHandle, secondSweepHandle, level));
+        } catch (RuntimeException e) {
+            if (ambientHandle != null) {
+                ambientHandle.free();
+            }
+            if (firstSweepHandle != null) {
+                firstSweepHandle.free();
+            }
+            if (secondSweepHandle != null) {
+                secondSweepHandle.free();
+            }
+            LOGGER.error("Failed to add alarm lights for {} in {}", pos, level.dimension().location(), e);
         }
     }
 
-    private static AreaLightData createLightData(float brightness) {
-        AreaLightData light = new AreaLightData();
-        light.setOcclusionEnabled(false);
-        light.setSize(1.0f, 1.0f);
-        light.setAngle((float) Math.toRadians(120));
-        light.setDistance(LIGHT_DISTANCE);
-        light.setColor(1, 0, 0);
-        light.setBrightness(brightness);
-        LOGGER.info("Created light: brightness={}, distance={}, color=red", brightness, LIGHT_DISTANCE);
+    private static PointLightData createAmbientLight(float signalStrength) {
+        PointLightData light = new PointLightData();
+        light.setOcclusionEnabled(true);
+        light.setRadius(AMBIENT_RADIUS);
+        light.setColor(1.0f, 0.055f, 0.015f);
+        light.setBrightness(signalStrength * AMBIENT_MAX_BRIGHTNESS);
         return light;
     }
 
-    /**
-     * Get world position from AlarmBlockEntity, handling Sable sub-levels
-     */
-
-    private static void updatePositions(BlockPos pos, AlarmLights pair, long gameTicks) {
-        // Get world position with access to level for proper Sable transformation
-        net.minecraft.world.level.Level level = pair.level();
-        if (level == null) {
-            LOGGER.warn("Cannot update light position for {} - level is null", pos);
-            return;
-        }
-        
-        Vector3f worldPos = getWorldPositionWithLevel(level, pos);
-        
-        float cx = worldPos.x;
-        float cy = worldPos.y;
-        float cz = worldPos.z;
-
-        // Вычисляем угол на основе игрового времени
-        long periodTicks = Math.max(1, ROTATION_PERIOD / 50);
-        double normalized = (gameTicks % periodTicks) / (double) periodTicks;
-        double angle = normalized * Math.PI * 2.0;
-
-        // Оба света в одной позиции (центр блока)
-        pair.first().getLightData().getPositionMutable().set(cx, cy, cz);
-        pair.second().getLightData().getPositionMutable().set(cx, cy, cz);
-
-        // Первый свет - фиксированная ориентация вверх-вниз
-        Vector3f direction1 = new Vector3f(0f, 1f, 0f).normalize();
-        pair.first().getLightData().getOrientationMutable().lookAlong(direction1, new Vector3f(0, 1, 0));
-        pair.first().markDirty();
-
-        // Второй свет - вращающаяся ориентация (по горизонтали)
-        // Используем quaternion для надёжного вращения вокруг Y оси
-        Quaternionf rotation = new Quaternionf();
-        rotation.rotationY((float) angle);
-        Vector3f baseDirection = new Vector3f(0f, 0f, 1f);
-        rotation.transform(baseDirection);
-        pair.second().getLightData().getOrientationMutable().set(rotation);
-        pair.second().markDirty();
+    private static AreaLightData createSweepLight(float signalStrength) {
+        AreaLightData light = new AreaLightData();
+        light.setOcclusionEnabled(true);
+        light.setSize(0.16D, 0.16D);
+        light.setAngle(SWEEP_ANGLE);
+        light.setDistance(SWEEP_DISTANCE);
+        light.setColor(1.0f, 0.11f, 0.025f);
+        light.setBrightness(signalStrength * SWEEP_MAX_BRIGHTNESS);
+        return light;
     }
 
-    /**
-     * Get world position with access to level for proper Sable transformation
-     */
-    private static Vector3f getWorldPositionWithLevel(net.minecraft.world.level.Level level, BlockPos pos) {
+    private static void updateLights(BlockPos pos, AlarmLights lights, double angle) {
+        Level level = lights.level();
+        float signalStrength = getSignalStrength(level, pos);
+
+        PointLightData ambient = lights.ambient().getLightData();
+        AreaLightData firstSweep = lights.firstSweep().getLightData();
+        AreaLightData secondSweep = lights.secondSweep().getLightData();
+        updateLightData(level, pos, angle, ambient, firstSweep, secondSweep);
+
+        ambient.setBrightness(signalStrength * AMBIENT_MAX_BRIGHTNESS);
+        firstSweep.setBrightness(signalStrength * SWEEP_MAX_BRIGHTNESS);
+        secondSweep.setBrightness(signalStrength * SWEEP_MAX_BRIGHTNESS);
+        lights.ambient().markDirty();
+        lights.firstSweep().markDirty();
+        lights.secondSweep().markDirty();
+    }
+
+    private static void updateLightData(
+        Level level,
+        BlockPos pos,
+        double angle,
+        PointLightData ambient,
+        AreaLightData firstSweep,
+        AreaLightData secondSweep
+    ) {
+        Direction facing = getAlarmFacing(level, pos);
+        Vector3f localAxis = directionVector(facing);
+        Vector3d localPosition = getLocalLightPosition(pos, localAxis);
+        Vector3d worldPosition = projectOutOfSubLevel(level, pos, new Vector3d(localPosition));
+
+        ambient.getPositionMutable().set(worldPosition);
+        firstSweep.getPositionMutable().set(worldPosition);
+        secondSweep.getPositionMutable().set(worldPosition);
+
+        updateSweepOrientation(level, pos, localPosition, worldPosition, localAxis, angle, firstSweep);
+        updateSweepOrientation(level, pos, localPosition, worldPosition, localAxis, angle + Math.PI, secondSweep);
+    }
+
+    private static void updateSweepOrientation(
+        Level level,
+        BlockPos pos,
+        Vector3d localPosition,
+        Vector3d worldPosition,
+        Vector3f localAxis,
+        double angle,
+        AreaLightData sweep
+    ) {
+        Vector3f localDirection = getSweepDirection(localAxis, angle);
+        Vector3f worldDirection = projectDirection(level, pos, localPosition, worldPosition, localDirection);
+
+        sweep.getOrientationMutable()
+            .rotationTo(worldDirection, new Vector3f(0.0f, 0.0f, 1.0f))
+            .normalize();
+    }
+
+    private static Vector3d getLocalLightPosition(BlockPos pos, Vector3f faceNormal) {
+        return new Vector3d(
+            pos.getX() + 0.5D + faceNormal.x * LIGHT_FACE_OFFSET,
+            pos.getY() + 0.5D + faceNormal.y * LIGHT_FACE_OFFSET,
+            pos.getZ() + 0.5D + faceNormal.z * LIGHT_FACE_OFFSET
+        );
+    }
+
+    private static Vector3f getSweepDirection(Vector3f axis, double angle) {
+        Vector3f tangent = Math.abs(axis.y) > 0.5f
+            ? new Vector3f(0.0f, 0.0f, 1.0f)
+            : new Vector3f(0.0f, 1.0f, 0.0f);
+        Vector3f bitangent = new Vector3f(axis).cross(tangent).normalize();
+
+        return tangent.mul((float) Math.cos(angle))
+            .add(bitangent.mul((float) Math.sin(angle)))
+            .normalize();
+    }
+
+    private static Vector3f projectDirection(
+        Level level,
+        BlockPos pos,
+        Vector3d localOrigin,
+        Vector3d worldOrigin,
+        Vector3f localDirection
+    ) {
+        Vector3d localEndpoint = new Vector3d(localOrigin).add(localDirection.x, localDirection.y, localDirection.z);
+        Vector3d worldEndpoint = projectOutOfSubLevel(level, pos, localEndpoint);
+        Vector3d worldDirection = worldEndpoint.sub(worldOrigin, new Vector3d()).normalize();
+        return new Vector3f(
+            (float) worldDirection.x,
+            (float) worldDirection.y,
+            (float) worldDirection.z
+        );
+    }
+
+    private static Vector3d projectOutOfSubLevel(Level level, BlockPos pos, Vector3d position) {
         try {
-            // Check if level is a sub-level by trying to access Sable Companion
-            // Use Sable Companion to transform position
-            Class<?> sableCompanionClass = Class.forName("dev.ryanhcode.sablecompanion.SableCompanion");
-            Object companionInstance = sableCompanionClass.getField("INSTANCE").get(null);
-            
-            // Get the projection method
-            java.lang.reflect.Method projectOutMethod = sableCompanionClass.getMethod(
-                "projectOutOfSubLevel", 
-                net.minecraft.world.level.Level.class, 
-                net.minecraft.world.phys.Vec3.class
+            SableCompanion.INSTANCE.projectOutOfSubLevel(level, position);
+            return position;
+        } catch (RuntimeException e) {
+            LOGGER.error(
+                "Sable transformation failed for {} in {}",
+                pos,
+                level.dimension().location(),
+                e
             );
-            
-            // Create Vec3 from block position
-            net.minecraft.world.phys.Vec3 blockVec = new net.minecraft.world.phys.Vec3(
-                pos.getX() + 0.5, 
-                pos.getY() + 0.5, 
-                pos.getZ() + 0.5
-            );
-            
-            // Project out of sub-level
-            net.minecraft.world.phys.Vec3 projectedVec = (net.minecraft.world.phys.Vec3) projectOutMethod.invoke(
-                companionInstance, 
-                level, 
-                blockVec
-            );
-            
-            LOGGER.debug("Transformed position for {}: {} -> {}", pos, blockVec, projectedVec);
-            return new Vector3f((float) projectedVec.x, (float) projectedVec.y, (float) projectedVec.z);
-        } catch (ClassNotFoundException e) {
-            // Sable Companion not available - this is normal when not in a sub-level
-            LOGGER.debug("Sable Companion not available, using regular coordinates");
-            return new Vector3f(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f);
-        } catch (Exception e) {
-            // Other reflection errors
-            LOGGER.debug("Sable transformation failed, using default position: {}", e.getMessage());
-            return new Vector3f(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f);
+            throw e;
         }
+    }
+
+    private static Direction getAlarmFacing(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.hasProperty(AlarmBlock.FACING)) {
+            return state.getValue(AlarmBlock.FACING);
+        }
+        return Direction.UP;
+    }
+
+    private static float getSignalStrength(Level level, BlockPos pos) {
+        if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
+            return be.getRedstoneSignal() / 15.0f;
+        }
+        return 0.0f;
+    }
+
+    private static Vector3f directionVector(Direction direction) {
+        return new Vector3f(direction.getStepX(), direction.getStepY(), direction.getStepZ());
     }
 }
