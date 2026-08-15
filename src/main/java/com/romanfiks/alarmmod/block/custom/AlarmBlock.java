@@ -9,8 +9,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RedStoneWireBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -113,32 +111,29 @@ public class AlarmBlock extends BaseEntityBlock {
     }
 
     public static int getRedstoneSignal(Level level, BlockPos pos) {
-        int maxPower = 0;
-        
-        // Check all 6 directions for redstone signals
-        for (Direction direction : Direction.values()) {
+        Direction facing = level.getBlockState(pos).getValue(FACING);
+
+        int neighborPower = 0;
+        for (Direction direction : perpendiculars(facing)) {
             BlockPos neighborPos = pos.relative(direction);
             BlockState neighborState = level.getBlockState(neighborPos);
-            
-            // Get power from redstone wire
-            if (neighborState.is(Blocks.REDSTONE_WIRE)) {
-                int wirePower = neighborState.getValue(RedStoneWireBlock.POWER);
-                maxPower = Math.max(maxPower, wirePower);
-            }
-            
-            // Get power from other sources (buttons, levers, etc)
+
             if (neighborState.isSignalSource()) {
-                maxPower = Math.max(maxPower, neighborState.getSignal(level, neighborPos, direction.getOpposite()));
+                neighborPower = Math.max(neighborPower, neighborState.getSignal(level, neighborPos, direction.getOpposite()));
             }
         }
-        
-        // Also check the block directly below
-        BlockState below = level.getBlockState(pos.below());
-        if (below.is(Blocks.REDSTONE_WIRE)) {
-            maxPower = Math.max(maxPower, below.getValue(RedStoneWireBlock.POWER));
-        }
-        
-        return maxPower;
+        System.out.println(neighborPower);
+
+        BlockPos basePos = pos.relative(facing.getOpposite());
+        return Math.max(level.getSignal(basePos,Direction.DOWN),neighborPower);
+    }
+
+    protected static Direction[] perpendiculars(Direction direction) {
+        return switch (direction) {
+            case DOWN, UP -> new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+            case NORTH, SOUTH -> new Direction[]{Direction.EAST, Direction.WEST, Direction.UP, Direction.SOUTH};
+            case EAST, WEST -> new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.UP, Direction.SOUTH};
+        };
     }
 
     @Override
