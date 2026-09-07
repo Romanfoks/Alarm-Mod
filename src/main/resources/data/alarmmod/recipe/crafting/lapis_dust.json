@@ -1,0 +1,13 @@
+{
+  "type":"minecraft:crafting_shapeless",
+  "category":"mics",
+  "ingredients":[
+    {
+      "item": "alarmmod:lapis_dust"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:blue_dye"
+  }
+}

@@ -122,7 +122,6 @@ public class AlarmBlock extends BaseEntityBlock {
                 neighborPower = Math.max(neighborPower, neighborState.getSignal(level, neighborPos, direction.getOpposite()));
             }
         }
-        System.out.println(neighborPower);
 
         BlockPos basePos = pos.relative(facing.getOpposite());
         return Math.max(level.getSignal(basePos,Direction.DOWN),neighborPower);

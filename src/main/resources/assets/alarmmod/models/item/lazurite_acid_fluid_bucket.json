@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "alarmmod:item/lazurite_solution_bucket"
+    "layer0": "alarmmod:item/lazurite_acid_bucket"
   }
 }

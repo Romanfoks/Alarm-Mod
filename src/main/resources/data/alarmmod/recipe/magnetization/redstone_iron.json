@@ -1,0 +1,13 @@
+{
+  "type": "powergrid:magnetization",
+  "ingredients": [
+    {
+      "item": "alarmmod:redstone_iron"
+    }
+  ],
+  "results": [
+    {
+      "id": "alarmmod:redstone_charged_iron"
+    }
+  ]
+}

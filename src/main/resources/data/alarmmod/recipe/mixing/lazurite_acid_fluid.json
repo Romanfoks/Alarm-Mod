@@ -1,19 +1,20 @@
 {
   "type": "create:mixing",
+  "heat_requirement": "heated",
   "ingredients": [
     {
       "item": "alarmmod:lapis_dust"
     },
     {
-      "type": "fluid_stack",
+      "type": "neoforge:single",
       "amount": 250,
-      "fluid": "powergrid:acid"
+      "fluid": "minecraft:water"
     }
   ],
   "results": [
     {
       "amount": 250,
-      "fluid": "alarmmod:lazurite_solution"
+      "id": "alarmmod:lazurite_acid_fluid"
     }
   ]
 }

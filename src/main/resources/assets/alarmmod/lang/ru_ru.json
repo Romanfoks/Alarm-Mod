@@ -5,7 +5,10 @@
   "item.alarmmod.lazurite_solution_bucket": "Ведро раствора лазурита",
   "block.alarmmod.redstone_charged_iron_block": "Заряженный редстоуном железный блок",
   "block.alarmmod.alarm": "Сирена",
-  "fluid.kubejs.lazurite_acid": "Лазуритовая Кислота",
-  "fluid.kubejs.redstone_acid": "Редстоуновая Кислота",
-  "creativetab.alarmmod.items": "Alarm Mod"
+  "creativetab.alarmmod.items": "Alarm Mod",
+  "item.alarmmod.redstone_acid_fluid_bucket": "Ведро Редстоуновой кислоты",
+  "item.alarmmod.lazurite_acid_fluid_bucket": "Ведро Лазуритовой кислоты",
+  "fluid.alarmmod.lazurite_acid": "Лазуритовая Кислота",
+  "fluid.alarmmod.redstone_acid": "Редстоуновая Кислота"
+
 }

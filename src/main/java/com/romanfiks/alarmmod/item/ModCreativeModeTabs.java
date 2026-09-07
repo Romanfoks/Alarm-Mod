@@ -24,6 +24,9 @@ public class ModCreativeModeTabs {
                                 output.accept(ModBlocks.REDSTONE_CHARGED_IRON_BLOCK);
                                 output.accept(ModItems.LAPIS_DUST);
                                 output.accept(ModBlocks.ALARM);
+                                output.accept(ModItems.LAZURITE_ACID_FLUID_BUCKET);
+                                output.accept(ModItems.REDSTONE_ACID_FLUID_BUCKET);
+
                     })
                     .build());
 

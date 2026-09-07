@@ -1,0 +1,19 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "type": "neoforge:single",
+      "amount": 250,
+      "fluid": "alarmmod:redstone_acid_fluid"
+    }
+  ],
+  "results": [
+    {
+      "id": "alarmmod:redstone_iron"
+    }
+  ]
+}

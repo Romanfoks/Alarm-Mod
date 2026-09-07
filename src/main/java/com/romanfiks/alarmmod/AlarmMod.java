@@ -2,6 +2,8 @@ package com.romanfiks.alarmmod;
 
 import com.romanfiks.alarmmod.block.ModBlocks;
 import com.romanfiks.alarmmod.block.entity.ModBlockEntities;
+import com.romanfiks.alarmmod.client.ClientModEvents;
+import com.romanfiks.alarmmod.fluid.ModFluids;
 import com.romanfiks.alarmmod.item.ModCreativeModeTabs;
 import com.romanfiks.alarmmod.item.ModItems;
 import org.slf4j.Logger;
@@ -26,14 +28,16 @@ public class AlarmMod {
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public AlarmMod(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
-
+        modEventBus.addListener(ClientModEvents::onClientExtensions);
         NeoForge.EVENT_BUS.register(this);
 
         ModCreativeModeTabs.register(modEventBus);
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
-
+        ModFluids.FLUID_TYPES.register(modEventBus); // Не забудь это!
+        ModFluids.FLUIDS.register(modEventBus);
+        // И это!
         ModBlockEntities.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC, "alarmmod-common.toml");

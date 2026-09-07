@@ -5,7 +5,9 @@
   "item.alarmmod.lazurite_solution_bucket": "Lazurite Solution Bucket",
   "block.alarmmod.redstone_charged_iron_block": "Redstone Charged Iron Block",
   "block.alarmmod.alarm": "Alarm",
-  "fluid.kubejs.lazurite_acid": "Lazulite Acid",
-  "fluid.kubejs.redstone_acid": "Redstone Acid",
-  "creativetab.alarmmod.items": "Alarm Mod"
+  "creativetab.alarmmod.items": "Alarm Mod",
+  "item.alarmmod.redstone_acid_fluid_bucket": "Redstone Acid Bucket",
+  "item.alarmmod.lazurite_acid_fluid_bucket": "Lazurite Acid Bucket",
+  "fluid.alarmmod.redstone_acid": "Redstone Acid",
+  "fluid.alarmmod.lazurite_acid": "Lazurite Acid"
 }

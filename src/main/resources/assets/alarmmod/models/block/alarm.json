@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "alarmmod:block/texture",
-		"particle": "alarmmod:block/texture"
+		"0": "alarmmod:block/alarm_block",
+		"particle": "alarmmod:block/alarm_block"
 	},
 	"elements": [
 		{
