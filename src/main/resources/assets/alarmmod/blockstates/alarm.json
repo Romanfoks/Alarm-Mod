@@ -22,7 +22,7 @@
     },
     {
       "when": { "facing": "east" },
-      "apply": { "model": "alarmmod:block/alarm", "x": 90, "y": 90 }
+      "apply": { "model": "alarmmod:block/alarm", "x": 90, "y": -90}
     }
   ]
 }
