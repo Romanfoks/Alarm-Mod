@@ -2,7 +2,7 @@ package com.romanfiks.alarmmod.block;
 
 import com.romanfiks.alarmmod.AlarmMod;
 import com.romanfiks.alarmmod.block.custom.AcidFluidBlock;
-import com.romanfiks.alarmmod.block.custom.AlarmBlock;
+import com.romanfiks.alarmmod.block.custom.RgbAlarmBlock;
 import com.romanfiks.alarmmod.fluid.ModFluids;
 import com.romanfiks.alarmmod.item.ModItems;
 import net.minecraft.world.item.BlockItem;
@@ -26,7 +26,7 @@ public class ModBlocks { public static final DeferredRegister.Blocks BLOCKS = De
             () -> new Block(BlockBehaviour.Properties.of()
                     .strength(5f).requiresCorrectToolForDrops().sound(SoundType.METAL)));
     public static final DeferredBlock<Block> ALARM = registerBlock("alarm",
-            () -> new AlarmBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.METAL)));
+            () -> new RgbAlarmBlock(BlockBehaviour.Properties.of().noOcclusion().sound(SoundType.METAL)));
     // В ModBlocks.java измени регистрацию ALARM_FLUID_BLOCK:
 
     // В ModBlocks.java

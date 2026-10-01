@@ -38,6 +38,10 @@ repositories {
         name = 'BlameJared Maven (CrT / Bookshelf)'
         url = 'https://maven.blamejared.com'
     }
+    maven { // For Ponder, which Create 6 depends on
+        name = 'Create Maven'
+        url = 'https://maven.createmod.dev/releases'
+    }
 }
 
 base {
@@ -142,6 +146,9 @@ dependencies {
     // Sable 2.0.3 помечает sablecompanion новее 1.6.0 как несовместимое ("Sable is out of date"),
     // поэтому версию выше поднимать нельзя без проверки совместимости.
     implementation("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${project.sable_companion_version}")
+    // Ponder нужен на этапе компиляции, а не только в рантайме: без него не резолвится
+    // иерархия SmartBlockEntity -> VirtualBlockEntity, на которую опираются наши сущности.
+    implementation("net.createmod.ponder:ponder-neoforge:${project.ponder_version}")
  }
 
 

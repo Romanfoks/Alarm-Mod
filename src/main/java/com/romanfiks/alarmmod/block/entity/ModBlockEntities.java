@@ -13,9 +13,9 @@ public class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
             DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, AlarmMod.MOD_ID);
 
-    public static final Supplier<BlockEntityType<AlarmBlockEntity>> ALARM_BE =
+    public static final Supplier<BlockEntityType<RgbAlarmBlockEntity>> RGB_ALARM_BE =
             BLOCK_ENTITIES.register("alarm_be", () -> BlockEntityType.Builder.of(
-                    AlarmBlockEntity::new, ModBlocks.ALARM.get()).build(null));
+                    RgbAlarmBlockEntity::new, ModBlocks.ALARM.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);

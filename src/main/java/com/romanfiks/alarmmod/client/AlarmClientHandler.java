@@ -2,7 +2,7 @@ package com.romanfiks.alarmmod.client;
 
 import com.romanfiks.alarmmod.AlarmMod;
 import com.romanfiks.alarmmod.block.ModBlocks;
-import com.romanfiks.alarmmod.block.entity.AlarmBlockEntity;
+import com.romanfiks.alarmmod.block.entity.RgbAlarmBlockEntity;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
@@ -36,10 +36,10 @@ public final class AlarmClientHandler {
             LOGGER.debug("RenderTypeLookup is unavailable; using the default alarm render layer", e);
         }
 
-        AlarmBlockEntity.onClientLoad = AlarmLightClient::onAlarmLoad;
-        AlarmBlockEntity.onClientRemove = AlarmLightClient::onAlarmRemove;
-        AlarmBlockEntity.onClientChanged = (pos, be) -> {
-            if (be.isAlarmOn()) {
+        RgbAlarmBlockEntity.onClientLoad = AlarmLightClient::onAlarmLoad;
+        RgbAlarmBlockEntity.onClientRemove = AlarmLightClient::onAlarmRemove;
+        RgbAlarmBlockEntity.onClientChanged = (pos, be) -> {
+            if (be.isLit()) {
                 AlarmLightClient.addOrUpdateLight(be);
             } else {
                 AlarmLightClient.onAlarmRemove(be);

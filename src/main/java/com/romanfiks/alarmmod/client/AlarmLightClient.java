@@ -1,7 +1,7 @@
 package com.romanfiks.alarmmod.client;
 
-import com.romanfiks.alarmmod.block.custom.AlarmBlock;
-import com.romanfiks.alarmmod.block.entity.AlarmBlockEntity;
+import com.romanfiks.alarmmod.block.custom.RgbAlarmBlock;
+import com.romanfiks.alarmmod.block.entity.RgbAlarmBlockEntity;
 import dev.ryanhcode.sable.companion.SableCompanion;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.light.data.AreaLightData;
@@ -66,13 +66,13 @@ public final class AlarmLightClient {
         }
     }
 
-    static void onAlarmLoad(AlarmBlockEntity be) {
-        if (be.isAlarmOn()) {
+    static void onAlarmLoad(RgbAlarmBlockEntity be) {
+        if (be.isLit()) {
             addOrUpdateLight(be);
         }
     }
 
-    static void onAlarmRemove(AlarmBlockEntity be) {
+    static void onAlarmRemove(RgbAlarmBlockEntity be) {
         Level level = be.getLevel();
         if (level == null) {
             LOGGER.warn("Cannot remove alarm light for {} because its level is null", be.getBlockPos());
@@ -101,7 +101,7 @@ public final class AlarmLightClient {
         lights.secondSweep().free();
     }
 
-    static void addOrUpdateLight(AlarmBlockEntity be) {
+    static void addOrUpdateLight(RgbAlarmBlockEntity be) {
         BlockPos pos = be.getBlockPos();
         Level level = be.getLevel();
         if (level == null) {
@@ -114,11 +114,11 @@ public final class AlarmLightClient {
             return;
         }
 
-        float signalStrength = be.getRedstoneSignal() / 15.0f;
-        PointLightData ambient = createAmbientLight(signalStrength);
-        AreaLightData firstSweep = createSweepLight(signalStrength);
-        AreaLightData secondSweep = createSweepLight(signalStrength);
+        PointLightData ambient = createAmbientLight();
+        AreaLightData firstSweep = createSweepLight();
+        AreaLightData secondSweep = createSweepLight();
         updateLightData(level, pos, rotationAngle, ambient, firstSweep, secondSweep);
+        applyRgb(ambient, firstSweep, secondSweep, be);
 
         LightRenderHandle<PointLightData> ambientHandle = null;
         LightRenderHandle<AreaLightData> firstSweepHandle = null;
@@ -142,39 +142,65 @@ public final class AlarmLightClient {
         }
     }
 
-    private static PointLightData createAmbientLight(float signalStrength) {
+    private static PointLightData createAmbientLight() {
         PointLightData light = new PointLightData();
         light.setOcclusionEnabled(true);
         light.setRadius(AMBIENT_RADIUS);
-        light.setColor(1.0f, 0.055f, 0.015f);
-        light.setBrightness(signalStrength * AMBIENT_MAX_BRIGHTNESS);
+        light.setBrightness(0.0f);
         return light;
     }
 
-    private static AreaLightData createSweepLight(float signalStrength) {
+    private static AreaLightData createSweepLight() {
         AreaLightData light = new AreaLightData();
         light.setOcclusionEnabled(true);
         light.setSize(0.16D, 0.16D);
         light.setAngle(SWEEP_ANGLE);
         light.setDistance(SWEEP_DISTANCE);
-        light.setColor(1.0f, 0.11f, 0.025f);
-        light.setBrightness(signalStrength * SWEEP_MAX_BRIGHTNESS);
+        light.setBrightness(0.0f);
         return light;
+    }
+
+    /**
+     * Переносит каналы сирены на свет Veil: цвет берётся из самих каналов, а общая
+     * яркость — по самому яркому из них.
+     */
+    private static void applyRgb(
+        PointLightData ambient,
+        AreaLightData firstSweep,
+        AreaLightData secondSweep,
+        RgbAlarmBlockEntity be
+    ) {
+        float red = be.getRed();
+        float green = be.getGreen();
+        float blue = be.getBlue();
+        float intensity = Math.max(red, Math.max(green, blue));
+
+        ambient.setColor(red, green, blue);
+        firstSweep.setColor(red, green, blue);
+        secondSweep.setColor(red, green, blue);
+
+        ambient.setBrightness(intensity * AMBIENT_MAX_BRIGHTNESS);
+        firstSweep.setBrightness(intensity * SWEEP_MAX_BRIGHTNESS);
+        secondSweep.setBrightness(intensity * SWEEP_MAX_BRIGHTNESS);
     }
 
     private static void updateLights(LightKey key, AlarmLights lights, double angle) {
         Level level = lights.level();
         BlockPos pos = key.pos();
-        float signalStrength = getSignalStrength(level, pos);
 
         PointLightData ambient = lights.ambient().getLightData();
         AreaLightData firstSweep = lights.firstSweep().getLightData();
         AreaLightData secondSweep = lights.secondSweep().getLightData();
         updateLightData(level, pos, angle, ambient, firstSweep, secondSweep);
 
-        ambient.setBrightness(signalStrength * AMBIENT_MAX_BRIGHTNESS);
-        firstSweep.setBrightness(signalStrength * SWEEP_MAX_BRIGHTNESS);
-        secondSweep.setBrightness(signalStrength * SWEEP_MAX_BRIGHTNESS);
+        if (level.getBlockEntity(pos) instanceof RgbAlarmBlockEntity be) {
+            applyRgb(ambient, firstSweep, secondSweep, be);
+        } else {
+            ambient.setBrightness(0.0f);
+            firstSweep.setBrightness(0.0f);
+            secondSweep.setBrightness(0.0f);
+        }
+
         lights.ambient().markDirty();
         lights.firstSweep().markDirty();
         lights.secondSweep().markDirty();
@@ -188,7 +214,7 @@ public final class AlarmLightClient {
         AreaLightData firstSweep,
         AreaLightData secondSweep
     ) {
-        Direction facing = getAlarmFacing(level, pos);
+        Direction facing = getLightDirection(level, pos);
         Vector3f localAxis = directionVector(facing);
         Vector3d localPosition = getLocalLightPosition(pos, localAxis);
         Vector3d worldPosition = projectOutOfSubLevel(level, pos, new Vector3d(localPosition));
@@ -269,19 +295,12 @@ public final class AlarmLightClient {
         }
     }
 
-    private static Direction getAlarmFacing(Level level, BlockPos pos) {
+    private static Direction getLightDirection(Level level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        if (state.hasProperty(AlarmBlock.FACING)) {
-            return state.getValue(AlarmBlock.FACING);
+        if (state.hasProperty(RgbAlarmBlock.FACING)) {
+            return RgbAlarmBlock.lightDirection(state);
         }
         return Direction.UP;
-    }
-
-    private static float getSignalStrength(Level level, BlockPos pos) {
-        if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
-            return be.getRedstoneSignal() / 15.0f;
-        }
-        return 0.0f;
     }
 
     private static Vector3f directionVector(Direction direction) {
