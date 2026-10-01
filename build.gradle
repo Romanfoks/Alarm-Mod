@@ -128,17 +128,20 @@ configurations {
 }
 
 dependencies {
-   implementation "maven.modrinth:u6dRKJwZ:eBag7ypX"
-   implementation "maven.modrinth:power-grid:8EtGIOFr"
-   implementation "maven.modrinth:lhGA9TYQ:ZxYGwlk0"
-   implementation "maven.modrinth:LNytGWDc:UjX6dr61"
-   implementation "maven.modrinth:T9PomCSv:1L6XJqnY"
+    // Modrinth-идентификаторы сами кодируют версию, так что подменять их можно только на стороне Modrinth.
+    implementation "maven.modrinth:u6dRKJwZ:eBag7ypX"   // JEI 19.27.0.346
+    implementation "maven.modrinth:power-grid:8EtGIOFr"  // Power Grid 0.5.5.1 — тип рецепта powergrid:magnetization
+    implementation "maven.modrinth:lhGA9TYQ:ZxYGwlk0"   // Architectury 13.0.8
+    implementation "maven.modrinth:LNytGWDc:UjX6dr61"   // Create 6.0.10
+    implementation "maven.modrinth:T9PomCSv:1L6XJqnY"   // Sable 2.0.3
   implementation("foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}") {
         exclude group: "maven.modrinth"
         exclude group: "me.fallenbreath"
   }
     implementation("foundry.imguimc:imguimc-neoforge-${project.minecraft_version}:${project.imguimc_version}")
-    implementation("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:1.6.0")
+    // Sable 2.0.3 помечает sablecompanion новее 1.6.0 как несовместимое ("Sable is out of date"),
+    // поэтому версию выше поднимать нельзя без проверки совместимости.
+    implementation("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${project.sable_companion_version}")
  }
 
 

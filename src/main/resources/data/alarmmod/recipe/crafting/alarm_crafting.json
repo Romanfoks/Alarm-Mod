@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "mics",
+  "key": {
+    "A": {
+      "item": "minecraft:red_stained_glass_pane"
+    },
+    "B": {
+      "item": "minecraft:black_concrete"
+    },
+    "C": {
+      "item": "alarmmod:redstone_charged_iron"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "ACA",
+    "BBB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "alarmmod:alarm"
+  }
+}

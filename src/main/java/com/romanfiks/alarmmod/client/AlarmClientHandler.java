@@ -9,6 +9,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public final class AlarmClientHandler {
             if (be.isAlarmOn()) {
                 AlarmLightClient.addOrUpdateLight(be);
             } else {
-                AlarmLightClient.onAlarmRemove(pos);
+                AlarmLightClient.onAlarmRemove(be);
             }
         };
 
@@ -53,5 +54,10 @@ public final class AlarmClientHandler {
 
     private static void onRenderFrame(RenderFrameEvent.Pre event) {
         AlarmLightClient.tick(event.getPartialTick().getRealtimeDeltaTicks());
+    }
+
+    @SubscribeEvent
+    public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        AlarmLightClient.releaseAll();
     }
 }

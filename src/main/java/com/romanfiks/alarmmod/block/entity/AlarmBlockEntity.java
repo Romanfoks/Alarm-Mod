@@ -18,7 +18,7 @@ public class AlarmBlockEntity extends BlockEntity {
 
     // Client-side callbacks (set by AlarmClientHandler)
     public static Consumer<AlarmBlockEntity> onClientLoad;
-    public static Consumer<BlockPos> onClientRemove;
+    public static Consumer<AlarmBlockEntity> onClientRemove;
     public static BiConsumer<BlockPos, AlarmBlockEntity> onClientChanged;
 
     private boolean isAlarmOn = false;
@@ -45,8 +45,12 @@ public class AlarmBlockEntity extends BlockEntity {
     }
 
     public void setRedstoneSignal(int signal) {
-        this.redstoneSignal = Math.max(0, Math.min(15, signal));
-        this.isAlarmOn = this.redstoneSignal > 0;
+        int clamped = Math.max(0, Math.min(15, signal));
+        if (clamped == this.redstoneSignal) {
+            return;
+        }
+        this.redstoneSignal = clamped;
+        this.isAlarmOn = clamped > 0;
         this.setChanged();
         if (level != null) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
@@ -82,7 +86,7 @@ public class AlarmBlockEntity extends BlockEntity {
     @Override
     public void setRemoved() {
         if (level != null && level.isClientSide && onClientRemove != null) {
-            onClientRemove.accept(worldPosition);
+            onClientRemove.accept(this);
         }
         super.setRemoved();
     }

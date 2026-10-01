@@ -43,6 +43,6 @@ public class ClientModEvents {
                 // Изменили FF на 88 (50% прозрачности)
                 return 0x822C2C;
             }
-        }, ModFluids.RESTONE_ACID_TYPE.get());
+        }, ModFluids.REDSTONE_ACID_TYPE.get());
     }
 }

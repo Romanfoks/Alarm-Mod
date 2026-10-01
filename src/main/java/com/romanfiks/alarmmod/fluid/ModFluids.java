@@ -49,7 +49,7 @@ public class ModFluids {
 
     // --- ВТОРАЯ ЖИДКОСТЬ (TOXIC) ---
 
-    public static final DeferredHolder<FluidType, FluidType> RESTONE_ACID_TYPE = FLUID_TYPES.register("redstone_acid_fluid",
+    public static final DeferredHolder<FluidType, FluidType> REDSTONE_ACID_TYPE = FLUID_TYPES.register("redstone_acid_fluid",
             () -> new FluidType(FluidType.Properties.create()
                     .descriptionId("fluid.alarmmod.redstone_acid")
                     .canPushEntity(true).canSwim(true).canDrown(true)
@@ -57,15 +57,15 @@ public class ModFluids {
                     .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL)
                     .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY)));
 
-    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> RESTONE_ACID_FLUID = FLUIDS.register("redstone_acid_fluid",
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> REDSTONE_ACID_FLUID = FLUIDS.register("redstone_acid_fluid",
             () -> new BaseFlowingFluid.Source(ModFluids.TOXIC_PROPERTIES));
 
-    public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_RESTONE_ACID_FLUID = FLUIDS.register("redstone_acid_fluid_flowing",
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING_REDSTONE_ACID_FLUID = FLUIDS.register("redstone_acid_fluid_flowing",
             () -> new BaseFlowingFluid.Flowing(ModFluids.TOXIC_PROPERTIES));
 
     public static final BaseFlowingFluid.Properties TOXIC_PROPERTIES = new BaseFlowingFluid.Properties(
-            RESTONE_ACID_TYPE, RESTONE_ACID_FLUID, FLOWING_RESTONE_ACID_FLUID)
+            REDSTONE_ACID_TYPE, REDSTONE_ACID_FLUID, FLOWING_REDSTONE_ACID_FLUID)
             .slopeFindDistance(2).levelDecreasePerBlock(2)
-            .block(() -> (LiquidBlock) ModBlocks.RESTONE_ACID_FLUID_BLOCK.get())
+            .block(() -> (LiquidBlock) ModBlocks.REDSTONE_ACID_FLUID_BLOCK.get())
             .bucket(() -> ModItems.REDSTONE_ACID_FLUID_BUCKET.get());
 }

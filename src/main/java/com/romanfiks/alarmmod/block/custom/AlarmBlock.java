@@ -4,7 +4,6 @@ import com.mojang.serialization.MapCodec;
 import com.romanfiks.alarmmod.block.entity.AlarmBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,10 +30,6 @@ public class AlarmBlock extends BaseEntityBlock {
     public AlarmBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.UP));
-    }
-    @Override
-    protected boolean isSignalSource(@NotNull BlockState state) {
-        return true;
     }
     @Override
     protected @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
@@ -95,14 +89,6 @@ public class AlarmBlock extends BaseEntityBlock {
         }
     }
 
-    @Override
-    protected void tick(@NotNull BlockState state, @NotNull ServerLevel level, @NotNull BlockPos pos, @NotNull RandomSource random) {
-        super.tick(state, level, pos, random);
-        if (!level.isClientSide) {
-            updateAlarm(level, pos);
-        }
-    }
-
     public static void updateAlarm(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof AlarmBlockEntity be) {
             int redstoneSignal = getRedstoneSignal(level, pos);
@@ -130,13 +116,8 @@ public class AlarmBlock extends BaseEntityBlock {
     protected static Direction[] perpendiculars(Direction direction) {
         return switch (direction) {
             case DOWN, UP -> new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-            case NORTH, SOUTH -> new Direction[]{Direction.EAST, Direction.WEST, Direction.UP, Direction.SOUTH};
-            case EAST, WEST -> new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.UP, Direction.SOUTH};
+            case NORTH, SOUTH -> new Direction[]{Direction.EAST, Direction.WEST, Direction.UP, Direction.DOWN};
+            case EAST, WEST -> new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.UP, Direction.DOWN};
         };
-    }
-
-    @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

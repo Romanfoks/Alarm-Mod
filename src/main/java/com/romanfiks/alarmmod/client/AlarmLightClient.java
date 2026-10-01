@@ -9,6 +9,7 @@ import foundry.veil.api.client.render.light.data.PointLightData;
 import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3d;
@@ -31,7 +32,13 @@ public final class AlarmLightClient {
         Level level
     ) {}
 
-    private static final Map<BlockPos, AlarmLights> LIGHT_MAP = new HashMap<>();
+    /**
+     * Ключ карты света: координаты сами по себе не уникальны, одна и та же сирена
+     * может стоять в разных измерениях.
+     */
+    private record LightKey(ResourceKey<Level> dimension, BlockPos pos) {}
+
+    private static final Map<LightKey, AlarmLights> LIGHT_MAP = new HashMap<>();
 
     private static final float AMBIENT_RADIUS = 5.5f;
     private static final float AMBIENT_MAX_BRIGHTNESS = 0.45f;
@@ -54,7 +61,7 @@ public final class AlarmLightClient {
         rotationAngle = (rotationAngle + Math.max(0.0f, realtimeDeltaTicks) * ROTATION_RADIANS_PER_TICK)
             % (Math.PI * 2.0D);
 
-        for (Map.Entry<BlockPos, AlarmLights> entry : LIGHT_MAP.entrySet()) {
+        for (Map.Entry<LightKey, AlarmLights> entry : LIGHT_MAP.entrySet()) {
             updateLights(entry.getKey(), entry.getValue(), rotationAngle);
         }
     }
@@ -65,12 +72,30 @@ public final class AlarmLightClient {
         }
     }
 
-    static void onAlarmRemove(BlockPos pos) {
-        AlarmLights lights = LIGHT_MAP.remove(pos);
-        if (lights == null) {
+    static void onAlarmRemove(AlarmBlockEntity be) {
+        Level level = be.getLevel();
+        if (level == null) {
+            LOGGER.warn("Cannot remove alarm light for {} because its level is null", be.getBlockPos());
             return;
         }
+        AlarmLights lights = LIGHT_MAP.remove(new LightKey(level.dimension(), be.getBlockPos()));
+        if (lights != null) {
+            free(lights);
+        }
+    }
 
+    /**
+     * Вызывается при выходе из мира: setRemoved() у сущности вызывается не для всех
+     * сирен, поэтому без этого ручного сброса ресурсы света Veil остаются выделенными.
+     */
+    static void releaseAll() {
+        for (AlarmLights lights : LIGHT_MAP.values()) {
+            free(lights);
+        }
+        LIGHT_MAP.clear();
+    }
+
+    private static void free(AlarmLights lights) {
         lights.ambient().free();
         lights.firstSweep().free();
         lights.secondSweep().free();
@@ -78,13 +103,14 @@ public final class AlarmLightClient {
 
     static void addOrUpdateLight(AlarmBlockEntity be) {
         BlockPos pos = be.getBlockPos();
-        if (LIGHT_MAP.containsKey(pos)) {
-            return;
-        }
-
         Level level = be.getLevel();
         if (level == null) {
             LOGGER.warn("Cannot add alarm light for {} because its level is null", pos);
+            return;
+        }
+
+        LightKey key = new LightKey(level.dimension(), pos);
+        if (LIGHT_MAP.containsKey(key)) {
             return;
         }
 
@@ -101,7 +127,7 @@ public final class AlarmLightClient {
             ambientHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(ambient);
             firstSweepHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(firstSweep);
             secondSweepHandle = VeilRenderSystem.renderer().getLightRenderer().addLight(secondSweep);
-            LIGHT_MAP.put(pos, new AlarmLights(ambientHandle, firstSweepHandle, secondSweepHandle, level));
+            LIGHT_MAP.put(key, new AlarmLights(ambientHandle, firstSweepHandle, secondSweepHandle, level));
         } catch (RuntimeException e) {
             if (ambientHandle != null) {
                 ambientHandle.free();
@@ -136,8 +162,9 @@ public final class AlarmLightClient {
         return light;
     }
 
-    private static void updateLights(BlockPos pos, AlarmLights lights, double angle) {
+    private static void updateLights(LightKey key, AlarmLights lights, double angle) {
         Level level = lights.level();
+        BlockPos pos = key.pos();
         float signalStrength = getSignalStrength(level, pos);
 
         PointLightData ambient = lights.ambient().getLightData();

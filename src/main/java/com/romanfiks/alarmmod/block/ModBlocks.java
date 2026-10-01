@@ -37,8 +37,8 @@ public class ModBlocks { public static final DeferredRegister.Blocks BLOCKS = De
                             .noCollission()
                             .noLootTable()
             ));
-    public static final DeferredHolder<Block, Block> RESTONE_ACID_FLUID_BLOCK = BLOCKS.register("redstone_acid_fluid_block",
-            () -> new AcidFluidBlock(ModFluids.RESTONE_ACID_FLUID.get(),
+    public static final DeferredHolder<Block, Block> REDSTONE_ACID_FLUID_BLOCK = BLOCKS.register("redstone_acid_fluid_block",
+            () -> new AcidFluidBlock(ModFluids.REDSTONE_ACID_FLUID.get(),
                     BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noCollission().noLootTable()));
 
     public static <T extends Block> DeferredBlock<T> registerBlock(String name, Supplier<T> block) {
