@@ -151,9 +151,10 @@ dependencies {
     // Sable 2.0.3 помечает sablecompanion новее 1.6.0 как несовместимое ("Sable is out of date"),
     // поэтому версию выше поднимать нельзя без проверки совместимости.
     implementation("dev.ryanhcode.sable-companion:sable-companion-common-1.21.1:${project.sable_companion_version}")
-    // Ponder нужен на этапе компиляции, а не только в рантайме: без него не резолвится
-    // иерархия SmartBlockEntity -> VirtualBlockEntity, на которую опираются наши сущности.
-    implementation("net.createmod.ponder:ponder-neoforge:${project.ponder_version}")
+    // Ponder нужен только на этапе компиляции. В рантайме его и Flywheel поставляет сам Create
+    // (6.0.10 везёт ponder 1.0.82 и flywheel 1.0.6 в jar-в-jar), а implementation от Ponder
+    // притащил бы в dev-окружение ещё и Flywheel 1.0.4 — то есть две версии Flywheel сразу.
+    compileOnly("net.createmod.ponder:ponder-neoforge:${project.ponder_version}")
     // Flywheel — только compileOnly: в игре его и так подтягивает Create 6.0.10 (1.0.6 из jar-в-jar),
     // а вторая копия в рантайме означала бы конфликт двух версий Flywheel.
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${project.minecraft_version}:${project.flywheel_version}")
