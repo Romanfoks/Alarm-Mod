@@ -46,8 +46,17 @@ logoFile="icon.png" #optional
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Custom Mod for InfyniteLoop
+RGB-сирена для электросети Create: Power Grid. Четыре контакта — красный, зелёный, синий и общий минус. Цвет получается из схемы подключения, яркость зависит от напряжения на канале. Свет рисуется через Veil.
 '''
+
+# A URL for the "homepage" for this mod, displayed in the mod UI
+displayURL="https://modrinth.com/mod/alarm-mod" #optional
+
+# A URL to refer people to when problems occur with this mod
+issueTrackerURL="https://github.com/Romanfoks/Alarm-Mod/issues" #optional
+
+# The authors of the mod, displayed in the mod UI (optional)
+authors="Romanfoks" #optional
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
 #[[mixins]]
@@ -90,12 +99,15 @@ Custom Mod for InfyniteLoop
 [[dependencies.${mod_id}]]
 modId="create"
 type="required"
+reason="Блок-сущность сирены наследует SmartBlockEntity из Create"
+versionRange="[6.0.0,)"
 ordering="AFTER" # Твой мод должен грузиться ПОСЛЕ Create
 side="BOTH"
 [[dependencies.${mod_id}]]
 modId="powergrid"
 type="required"
 reason="Сирена питается от электросети Power Grid, рецепты используют тип powergrid:magnetization"
+versionRange="[0.5.5,)"
 ordering="AFTER" # Твой мод должен грузиться ПОСЛЕ Power Grid
 side="BOTH"
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
