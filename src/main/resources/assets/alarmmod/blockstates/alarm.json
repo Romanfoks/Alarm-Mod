@@ -1,57 +1,57 @@
 {
   "variants": {
-    "facing=up,along_first_axis=false": {
+    "facing=up,axis_along_first=false": {
       "model": "alarmmod:block/alarm"
     },
-    "facing=up,along_first_axis=true": {
+    "facing=up,axis_along_first=true": {
       "model": "alarmmod:block/alarm",
       "y": 90
     },
-    "facing=down,along_first_axis=false": {
+    "facing=down,axis_along_first=false": {
       "model": "alarmmod:block/alarm",
       "x": 180
     },
-    "facing=down,along_first_axis=true": {
+    "facing=down,axis_along_first=true": {
       "model": "alarmmod:block/alarm",
       "x": 180,
       "y": 90
     },
-    "facing=north,along_first_axis=false": {
+    "facing=north,axis_along_first=false": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 0
     },
-    "facing=north,along_first_axis=true": {
+    "facing=north,axis_along_first=true": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 90
     },
-    "facing=south,along_first_axis=false": {
+    "facing=south,axis_along_first=false": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 180
     },
-    "facing=south,along_first_axis=true": {
+    "facing=south,axis_along_first=true": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 270
     },
-    "facing=west,along_first_axis=false": {
+    "facing=west,axis_along_first=false": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 270
     },
-    "facing=west,along_first_axis=true": {
+    "facing=west,axis_along_first=true": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 0
     },
-    "facing=east,along_first_axis=false": {
+    "facing=east,axis_along_first=false": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 90
     },
-    "facing=east,along_first_axis=true": {
+    "facing=east,axis_along_first=true": {
       "model": "alarmmod:block/alarm",
       "x": 90,
       "y": 180

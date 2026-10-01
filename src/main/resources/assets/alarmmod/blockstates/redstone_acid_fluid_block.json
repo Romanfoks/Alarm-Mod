@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "alarmmod:block/redstone_acid_fluid_block"
+    }
+  }
+}
