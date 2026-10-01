@@ -2,11 +2,11 @@
   "multipart": [
     {
       "when": { "facing": "up" },
-      "apply": { "model": "alarmmod:block/alarm" }
+      "apply": { "model": "alarmmod:block/alarm", "x": -180}
     },
     {
       "when": { "facing": "down" },
-      "apply": { "model": "alarmmod:block/alarm", "x": -180 }
+      "apply": { "model": "alarmmod:block/alarm"}
     },
     {
       "when": { "facing": "north" },
@@ -18,11 +18,11 @@
     },
     {
       "when": { "facing": "west" },
-      "apply": { "model": "alarmmod:block/alarm", "x": -90, "y": -270 }
+      "apply": { "model": "alarmmod:block/alarm", "x": -90, "y": -90 }
     },
     {
       "when": { "facing": "east" },
-      "apply": { "model": "alarmmod:block/alarm", "x": -90, "y": -90 }
+      "apply": { "model": "alarmmod:block/alarm", "x": 90, "y": 90 }
     }
   ]
 }
