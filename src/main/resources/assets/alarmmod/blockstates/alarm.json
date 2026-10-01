@@ -1,60 +1,28 @@
 {
-  "variants": {
-    "facing=up,axis_along_first=false": {
-      "model": "alarmmod:block/alarm"
+  "multipart": [
+    {
+      "when": { "facing": "up" },
+      "apply": { "model": "alarmmod:block/alarm" }
     },
-    "facing=up,axis_along_first=true": {
-      "model": "alarmmod:block/alarm",
-      "y": 90
+    {
+      "when": { "facing": "down" },
+      "apply": { "model": "alarmmod:block/alarm", "x": 180 }
     },
-    "facing=down,axis_along_first=false": {
-      "model": "alarmmod:block/alarm",
-      "x": 180
+    {
+      "when": { "facing": "north" },
+      "apply": { "model": "alarmmod:block/alarm", "x": 90, "y": 0 }
     },
-    "facing=down,axis_along_first=true": {
-      "model": "alarmmod:block/alarm",
-      "x": 180,
-      "y": 90
+    {
+      "when": { "facing": "south" },
+      "apply": { "model": "alarmmod:block/alarm", "x": 90, "y": 180 }
     },
-    "facing=north,axis_along_first=false": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 0
+    {
+      "when": { "facing": "west" },
+      "apply": { "model": "alarmmod:block/alarm", "x": 90, "y": 270 }
     },
-    "facing=north,axis_along_first=true": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 90
-    },
-    "facing=south,axis_along_first=false": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 180
-    },
-    "facing=south,axis_along_first=true": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 270
-    },
-    "facing=west,axis_along_first=false": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 270
-    },
-    "facing=west,axis_along_first=true": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 0
-    },
-    "facing=east,axis_along_first=false": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 90
-    },
-    "facing=east,axis_along_first=true": {
-      "model": "alarmmod:block/alarm",
-      "x": 90,
-      "y": 180
+    {
+      "when": { "facing": "east" },
+      "apply": { "model": "alarmmod:block/alarm", "x": 90, "y": 90 }
     }
-  }
+  ]
 }
