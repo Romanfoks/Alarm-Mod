@@ -38,9 +38,14 @@ repositories {
         name = 'BlameJared Maven (CrT / Bookshelf)'
         url = 'https://maven.blamejared.com'
     }
-    maven { // For Ponder, which Create 6 depends on
+    maven { // Ponder, which Create 6 depends on
         name = 'Create Maven'
-        url = 'https://maven.createmod.dev/releases'
+        url = 'https://maven.createmod.net'
+        content {
+            includeGroupAndSubgroups("net.createmod")
+            includeGroupAndSubgroups("com.simibubi")
+            includeGroupAndSubgroups("dev.engine-room")
+        }
     }
 }
 
