@@ -154,6 +154,10 @@ dependencies {
     // Ponder нужен на этапе компиляции, а не только в рантайме: без него не резолвится
     // иерархия SmartBlockEntity -> VirtualBlockEntity, на которую опираются наши сущности.
     implementation("net.createmod.ponder:ponder-neoforge:${project.ponder_version}")
+    // Flywheel — только compileOnly: в игре его и так подтягивает Create 6.0.10 (1.0.6 из jar-в-jar),
+    // а вторая копия в рантайме означала бы конфликт двух версий Flywheel.
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${project.minecraft_version}:${project.flywheel_version}")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-${project.minecraft_version}:${project.flywheel_version}")
  }
 
 
