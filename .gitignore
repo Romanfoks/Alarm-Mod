@@ -32,6 +32,10 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+### Logs ###
+*.log
+log.txt
+
 ### Minecraft Modding ###
 run/
 !**/src/**/run/

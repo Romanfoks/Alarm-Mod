@@ -14,3 +14,14 @@
 * **Visual Indicators:** Clear visual cues to display active alarms, danger zones, and power statuses.
 
 My russian guide https://www.youtube-nocookie.com/embed/uxXfl7dBp5g
+
+---
+
+## 🔨 Building
+
+```bash
+./gradlew build
+```
+
+Requires a JDK 21 toolchain. Gradle 9.2.1 cannot run on JDK 26 — if `JAVA_HOME` points at a
+newer JDK, the build fails with `Unsupported class file major version 70`.
