@@ -73,11 +73,12 @@ public class RgbAlarmBlock extends SurfaceElectricBlock implements IBE<RgbAlarmB
     }
 
     /**
-     * В SurfaceElectricBlock {@code FACING} указывает в сторону поверхности крепления,
-     * поэтому свет сирены направлен в противоположную сторону.
+     * Направление, в котором сирена светит. Проверено в игре: {@code FACING} у
+     * SurfaceElectricBlock указывает наружу от поверхности крепления, поэтому свет
+     * направлен именно в эту сторону, без инверсии.
      */
     public static Direction lightDirection(BlockState state) {
-        return state.getValue(FACING).getOpposite();
+        return state.getValue(FACING);
     }
 
     @Override
